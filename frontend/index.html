@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Cadastre Aisne</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <style>
+    body { margin: 0; }
+    #map { height: 100vh; }
+  </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+const map = L.map('map').setView([49.5, 3.5], 9);
+
+// Fond de carte OpenStreetMap
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+let layer;
+
+// Charger les parcelles depuis ton API
+async function loadParcelles() {
+  const bbox = map.getBounds().toBBoxString();
+
+  const res = await fetch(`http://localhost:3000/parcelles?bbox=${bbox}`);
+  const data = await res.json();
+
+  // Supprimer ancienne couche
+  if (layer) {
+    map.removeLayer(layer);
+  }
+
+  // Convertir en GeoJSON
+  const features = data.map(p => ({
+    type: "Feature",
+    geometry: JSON.parse(p.geom),
+    properties: p
+  }));
+
+  layer = L.geoJSON(features, {
+    style: {
+      color: "blue",
+      weight: 1
+    },
+    onEachFeature: (feature, layer) => {
+      layer.on("click", () => {
+        layer.bindPopup(`
+        <b>Parcelle</b><br>
+        Commune: ${feature.properties.commune}<br>
+        Section: ${feature.properties.section}<br>
+        Numéro: ${feature.properties.numero}<br>
+        Surface: ${feature.properties.contenance} m²<br>
+        Arpentée: ${feature.properties.arpente}
+        `);
+      });
+    }
+  }).addTo(map);
+}
+
+// Charger au début
+loadParcelles();
+
+// Recharger quand on bouge
+map.on("moveend", loadParcelles);
+</script>
+
+</body>
+</html>

@@ -24,12 +24,12 @@ app.get("/parcelles", async (req, res) => {
   const [xmin, ymin, xmax, ymax] = bbox.split(",").map(Number);
 
   const query = `
-    SELECT id, commune, section, numero,
+    SELECT id, commune, section, numero, contenance, arpente,
     ST_AsGeoJSON(geometry) as geom
     FROM parcelles
     WHERE geometry && ST_MakeEnvelope($1,$2,$3,$4,4326)
-    LIMIT 200
-  `;
+    LIMIT 1000
+    `;
 
   const result = await pool.query(query, [xmin, ymin, xmax, ymax]);
 
