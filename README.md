@@ -21,11 +21,19 @@ Application web permettant d’afficher les parcelles cadastrales et d’accéde
 
 ### PCI (Parcellaire Express)
 
-https://cadastre.data.gouv.fr
+FIchier GEOSJON contenant les parcelles:
+
+https://cadastre.data.gouv.fr/datasets/cadastre-etalab
+
+#### selectionner les données de l'AISNE, sous format GEOJSON, pour les parcelles et télécharger le fichier, puis extraire le contenu dans un fichier .json
 
 ### MAJIC (personnes morales)
 
-Fichier GeoPackage contenant les SIREN
+Fichier GeoPackage contenant les SIREN:
+
+https://www.data.gouv.fr/datasets/fichiers-majic-des-personnes-morales
+
+#### Mettre les fichiers dans un dossier data à l'intérieur de l'appli
 
 ---
 
