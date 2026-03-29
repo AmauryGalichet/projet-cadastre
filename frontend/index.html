@@ -53,18 +53,42 @@ async function loadParcelles() {
       weight: 1
     },
     onEachFeature: (feature, layer) => {
-      layer.on("click", () => {
+
+    layer.on("click", async () => {
+
+        const p = feature.properties;
+
+        // appel API MAJIC
+        const res = await fetch(
+        `http://localhost:3000/majic?commune=${p.commune}&section=${p.section}&numero=${p.numero}`
+        );
+
+        const data = await res.json();
+
+        let sirenInfo = "Non disponible";
+
+        if (data.length > 0) {
+        sirenInfo = data.map(d => `
+            SIREN: ${d.num_siren}<br>
+            ${d.denomination || ""}
+        `).join("<br>");
+        }
+
         layer.bindPopup(`
         <b>Parcelle</b><br>
-        Commune: ${feature.properties.commune}<br>
-        Section: ${feature.properties.section}<br>
-        Numéro: ${feature.properties.numero}<br>
-        Surface: ${feature.properties.contenance} m²<br>
-        Arpentée: ${feature.properties.arpente}
-        `);
-      });
+        Commune: ${p.commune}<br>
+        Section: ${p.section}<br>
+        Numéro: ${p.numero}<br>
+        Surface: ${p.contenance} m²<br><br>
+
+        <b>MAJIC</b><br>
+        ${sirenInfo}
+        `).openPopup();
+
+    });
+
     }
-  }).addTo(map);
+    }).addTo(map);
 }
 
 // Charger au début
