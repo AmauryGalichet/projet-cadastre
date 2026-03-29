@@ -52,42 +52,66 @@ async function loadParcelles() {
       color: "blue",
       weight: 1
     },
-    onEachFeature: (feature, layer) => {
+onEachFeature: (feature, layer) => {
 
-    layer.on("click", async () => {
+  layer.on("click", async () => {
 
-        const p = feature.properties;
+    const p = feature.properties;
 
-        // appel API MAJIC
-        const res = await fetch(
+    layer.bindPopup("Chargement...").openPopup();
+
+    try {
+      // 1️⃣ MAJIC
+      const resMajic = await fetch(
         `http://localhost:3000/majic?commune=${p.commune}&section=${p.section}&numero=${p.numero}`
-        );
+      );
 
-        const data = await res.json();
+      const majicData = await resMajic.json();
 
-        let sirenInfo = "Non disponible";
-
-        if (data.length > 0) {
-        sirenInfo = data.map(d => `
-            SIREN: ${d.num_siren}<br>
-            ${d.denomination || ""}
-        `).join("<br>");
-        }
-
-        layer.bindPopup(`
+      let content = `
         <b>Parcelle</b><br>
         Commune: ${p.commune}<br>
         Section: ${p.section}<br>
         Numéro: ${p.numero}<br>
         Surface: ${p.contenance} m²<br><br>
+      `;
 
-        <b>MAJIC</b><br>
-        ${sirenInfo}
-        `).openPopup();
+      if (majicData.length > 0) {
 
-    });
+        const sirenResponses = await Promise.all(
+            majicData.map(m =>
+            fetch(`http://localhost:3000/siren/${m.num_siren}`)
+                .then(res => res.json())
+            )
+        );
 
+        for (let i = 0; i < majicData.length; i++) {
+            const m = majicData[i];
+            const s = sirenResponses[i];
+
+            content += `
+            <b>SIREN :</b> ${m.num_siren}<br>
+            <b>Nom :</b> ${s.nom || "N/A"}<br>
+            <b>Activité (NAF) :</b> ${s.activite || "N/A"}<br>
+            <b>Type :</b> ${s.type || "N/A"}<br>
+            <b>Statut :</b> ${s.etat || "N/A"}<br>
+            <b>Création :</b> ${s.date_creation || "N/A"}<br><br>
+            `;
+        }
+
+      } else {
+        content += "Aucune donnée MAJIC";
+      }
+
+      layer.setPopupContent(content);
+
+    } catch (err) {
+      layer.setPopupContent("Erreur lors du chargement");
+      console.error(err);
     }
+  });
+
+}
     }).addTo(map);
 }
 

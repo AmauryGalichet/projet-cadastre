@@ -1,16 +1,20 @@
+import os
 import geopandas as gpd
-import psycopg2
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
 
-# CONFIG
-DB_USER = "postgres"
-DB_PASSWORD = "root"
-DB_HOST = "localhost"
-DB_PORT = "5432"
-DB_NAME = "cadastre"
+# Charger le .env
+load_dotenv()
+
+# Variables d'environnement
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
 # fichier
-file_path = r"C:\Users\amaur\Documents\Amaury Polytech\Projet parcelles\cadastre.json"
+file_path = "data\cadastre.json"
 
 print("Chargement du GeoJSON...")
 gdf = gpd.read_file(file_path)

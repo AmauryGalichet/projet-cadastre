@@ -1,51 +1,61 @@
-# Projet Cadastre Aisne (02)
+# Projet Cadastre - Aisne (02)
 
-## Objectif
+## Description
 
-Développer une application web permettant d'afficher les parcelles cadastrales du département de l'Aisne (02), avec une architecture complète :
-
-* Base de données PostGIS
-* API backend
-* Interface web interactive
+Application web permettant d’afficher les parcelles cadastrales et d’accéder aux informations MAJIC et SIREN.
 
 ---
 
-## Technologies utilisées
+## 🧰 Technologies
 
-* PostgreSQL + PostGIS
-* Node.js (Express)
+* PostgreSQL / PostGIS
+* Node.js / Express
 * Leaflet
 * OpenStreetMap
+* API SIRENE (INSEE)
+* Python (GeoPandas)
 
 ---
 
-## Données
+## 📥 Données
 
-Données issues de :
-cadastre.data.gouv.fr (Parcellaire cadastral ouvert)
+### PCI (Parcellaire Express)
+
+https://cadastre.data.gouv.fr
+
+### MAJIC (personnes morales)
+
+Fichier GeoPackage contenant les SIREN
 
 ---
 
-## Installation
-
-### 1. Base de données
-
-Créer une base PostgreSQL :
+## 🗄️ Base de données
 
 ```sql
 CREATE DATABASE cadastre;
+\c cadastre;
 CREATE EXTENSION postgis;
 ```
 
-Importer les données avec :
+---
+
+## 📥 Import des données
+
+### Parcelles
 
 ```bash
 python scripts/import_parcelles.py
 ```
 
+### MAJIC
+
+```bash
+python scripts/import_majic.py
+```
+
 ---
 
-### 2. Backend
+## 🔌 Backend
 
 ```bash
 cd backend
@@ -53,45 +63,67 @@ npm install
 node server.js
 ```
 
-API disponible sur :
-http://localhost:3000
+---
+
+## 🌍 Frontend
+
+```bash
+cd frontend
+python -m http.server 8000
+```
+
+http://localhost:8000
 
 ---
 
-### 3. Frontend
+## ⚙️ API
 
-Ouvrir :
+### /parcelles
 
-```bash
-frontend/index.html
+Retourne les parcelles (PostGIS)
+
+### /majic
+
+Retourne les données MAJIC (SIREN)
+
+### /siren/:siren
+
+Retourne les infos entreprise via API INSEE
+
+---
+
+## 🔐 Variables d’environnement
+
+Créer `.env` :
+
+```
+INSEE_API_KEY=xxxx
+DB_USER=postgres
+DB_PASSWORD=xxx
 ```
 
 ---
 
-## API
+## 🧠 Fonctionnement
 
-### GET /parcelles
+1. Chargement des parcelles
+2. Clic sur une parcelle :
 
-Paramètre :
-
-* bbox=xmin,ymin,xmax,ymax
-
-Retourne les parcelles en GeoJSON
-
----
-
-## Fonctionnalités
-
-* Affichage des parcelles cadastrales
-* Chargement dynamique selon la carte
-* Interaction utilisateur
+   * récupération du SIREN (MAJIC)
+   * appel API SIRENE
+   * affichage des infos entreprise
 
 ---
 
-## Améliorations possibles
+## 🎯 Bonus
 
-* Ajout des données MAJIC
-* Connexion API SIREN
-* Optimisation avec vector tiles
+Intégration de l’API SIRENE permettant d’obtenir :
+
+* nom de l’entreprise
+* activité principale
 
 ---
+
+## 👨‍💻 Auteur
+
+Amaury Galichet
